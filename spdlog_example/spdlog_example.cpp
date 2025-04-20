@@ -1,6 +1,10 @@
 #include <iostream>
 #include <thread>
 #include <chrono>
+#include <functional>
+#include <sstream>
+#include <memory>
+#include <string>
 
 #include "spdlog/spdlog.h"
 #include "spdlog/cfg/env.h" // support for loading levels from the environment variable
@@ -10,6 +14,10 @@
 #include "spdlog/logger.h" // support for logger
 #include "spdlog/sinks/rotating_file_sink.h" // support for rotating file sink
 #include "spdlog/sinks/sink.h" // support for sink
+#include "spdlog/async.h" // support for async logger
+#include "spdlog/fmt/ostr.h" // support for user defined types
+#include "spdlog/sinks/ostream_sink.h" // support for ostream sink
+
 
 /**
  * 日志级别：(默认是 info)
@@ -148,13 +156,13 @@ void global_fun_example() {
   spdlog::get("logger_example")->critical("This is a critical message from test after get logger_example");
 }
 
-void all() {
-  spdlog::trace("This is a trace message from all");
-  spdlog::debug("This is a debug message from all");
-  spdlog::info("This is an info message from all");
-  spdlog::warn("This is a warn message from all");
-  spdlog::error("This is an error message from all");
-  spdlog::critical("This is a critical message from all");
+void default_log() {
+  spdlog::trace("This is a trace message from default_log");
+  spdlog::debug("This is a debug message from default_log");
+  spdlog::info("This is an info message from default_log");
+  spdlog::warn("This is a warn message from default_log");
+  spdlog::error("This is an error message from default_log");
+  spdlog::critical("This is a critical message from default_log");
 }
 
 /**
@@ -178,6 +186,52 @@ void rotating_file_sink_example() {
   }
 }
 
+struct CustomType {
+  int id;
+  std::string name;
+
+  template<typename OStream>
+  friend OStream& operator<<(OStream& os, const CustomType& ct) {
+    os << "CustomType{id: " << ct.id << ", name: " << ct.name << "}";
+    return os;
+  }
+};
+
+void custom_type_example() {
+  spdlog::trace("This is a trace message from custom_type_example {}", CustomType{1, "CustomType"});
+  spdlog::debug("This is a debug message from custom_type_example {}", CustomType{1, "CustomType"});
+  spdlog::info("This is an info message from custom_type_example {}", CustomType{1, "CustomType"});
+  spdlog::warn("This is a warn message from custom_type_example {}", CustomType{1, "CustomType"});
+  spdlog::error("This is an error message from custom_type_example {}", CustomType{1, "CustomType"});
+  spdlog::critical("This is a critical message from custom_type_example {}", CustomType{1, "CustomType"});
+}
+
+void async_example() {
+  // async example
+  auto async_logger = spdlog::create_async<spdlog::sinks::stdout_color_sink_mt>("async_logger");
+  async_logger->set_level(spdlog::level::debug); // Set global log level to trace
+  async_logger->trace("This is a trace message from async_logger");
+  async_logger->debug("This is a debug message from async_logger");
+  async_logger->info("This is an info message from async_logger");
+  async_logger->warn("This is a warn message from async_logger");
+  async_logger->error("This is an error message from async_logger");
+  async_logger->critical("This is a critical message from async_logger");
+}
+
+void ostream_example() {
+  auto stream = std::ostringstream();
+  auto ostream_sink = std::make_shared<spdlog::sinks::ostream_sink_mt>(stream);
+  std::shared_ptr<spdlog::logger> ostream_logger = std::make_shared<spdlog::logger>("ostream_logger", ostream_sink);
+  ostream_logger->set_level(spdlog::level::debug); // Set global log level to trace
+  ostream_logger->trace("This is a trace message from ostream_logger");
+  ostream_logger->debug("This is a debug message from ostream_logger");
+  ostream_logger->info("This is an info message from ostream_logger");
+  ostream_logger->warn("This is a warn message from ostream_logger");
+  ostream_logger->error("This is an error message from ostream_logger");
+  ostream_logger->critical("This is a critical message from ostream_logger");
+  std::cout << "Ostream logger output: " << stream.str() << std::endl;
+}
+
 int main(int argc, char* argv[]) {
   std::cout << "======================= set_log_level =======================" << std::endl;
   set_log_level(argc, argv);
@@ -187,10 +241,20 @@ int main(int argc, char* argv[]) {
   logger_example();
   std::cout << "======================= global_fun_example =======================" << std::endl;
   global_fun_example();
-  std::cout << "======================= all =======================" << std::endl;
-  all();
   std::cout << "======================= rotating_file_sink_example =======================" << std::endl;
-  rotating_file_sink_example();
+  std::thread  rotating_file_sink_thread(rotating_file_sink_example);
+  std::cout << "======================= default_log =======================" << std::endl;
+  default_log();
+  std::cout << "======================= async_example =======================" << std::endl;
+  async_example();
+  std::cout << "======================= custom_type_example =======================" << std::endl;
+  custom_type_example();
+  std::cout << "======================= ostream_example =======================" << std::endl;
+  ostream_example();
+
+  if(rotating_file_sink_thread.joinable()) {
+    rotating_file_sink_thread.join();
+  }
 
   return 0;
 }
