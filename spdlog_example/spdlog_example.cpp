@@ -1,4 +1,6 @@
 #include <iostream>
+#include <thread>
+#include <chrono>
 
 #include "spdlog/spdlog.h"
 #include "spdlog/cfg/env.h" // support for loading levels from the environment variable
@@ -6,6 +8,8 @@
 #include "spdlog/sinks/basic_file_sink.h" // support for basic file sink
 #include "spdlog/sinks/stdout_color_sinks.h" // support for colored console output
 #include "spdlog/logger.h" // support for logger
+#include "spdlog/sinks/rotating_file_sink.h" // support for rotating file sink
+#include "spdlog/sinks/sink.h" // support for sink
 
 /**
  * 日志级别：(默认是 info)
@@ -153,6 +157,27 @@ void all() {
   spdlog::critical("This is a critical message from all");
 }
 
+/**
+ * Create a file rotating logger with 1024*1024 size max and 3 rotated files.
+ * 
+ * 3个循环文件直接在文件名和文件后缀之间加上数字后缀
+ * 且会有额外一个文件是实际记录日志的，当文件满了之后，会将当前文件重命名为 logs/rotating_logger.log.1
+ * 然后创建一个新的文件 logs/rotating_logger.log
+ */
+void rotating_file_sink_example() {
+  auto rotating_logger = spdlog::create<spdlog::sinks::rotating_file_sink_mt>("rotating_logger", "logs/rotating_logger.log", 1024 * 1024, 3);
+
+  while(true) {
+    rotating_logger->trace("This is a trace message from rotating_logger");
+    rotating_logger->debug("This is a debug message from rotating_logger");
+    rotating_logger->info("This is an info message from rotating_logger");
+    rotating_logger->warn("This is a warn message from rotating_logger");
+    rotating_logger->error("This is an error message from rotating_logger");
+    rotating_logger->critical("This is a critical message from rotating_logger");
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+  }
+}
+
 int main(int argc, char* argv[]) {
   std::cout << "======================= set_log_level =======================" << std::endl;
   set_log_level(argc, argv);
@@ -164,6 +189,8 @@ int main(int argc, char* argv[]) {
   global_fun_example();
   std::cout << "======================= all =======================" << std::endl;
   all();
+  std::cout << "======================= rotating_file_sink_example =======================" << std::endl;
+  rotating_file_sink_example();
 
   return 0;
 }
