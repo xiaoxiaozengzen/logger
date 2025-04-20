@@ -1,5 +1,5 @@
 #include <iostream>
 
-void log(const std::string& message) {
-    std::cout << message << std::endl;
+void log_trace(const std::string& message) {
+    std::cout << "[TRACE] " << message << std::endl;
 }
