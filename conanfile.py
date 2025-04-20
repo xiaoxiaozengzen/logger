@@ -11,9 +11,11 @@ class LoggerConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "with_spdlog_example": [True, False],
+        "with_fmt_example": [True, False],
     }
     default_options = {
         "with_spdlog_example": True,
+        "with_fmt_example": True,
     }
 
     @property
@@ -22,6 +24,8 @@ class LoggerConan(ConanFile):
 
     def requirements(self):
         self.requires("spdlog/1.9.2")
+        if self.options.with_fmt_example:
+            self.requires("fmt/8.0.1")
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -30,6 +34,10 @@ class LoggerConan(ConanFile):
             tc.variables["WITH_SPDLOG_EXAMPLE"] = "ON"
         else:
             tc.variables["WITH_SPDLOG_EXAMPLE"] = "OFF"
+        if self.options.with_fmt_example:
+            tc.variables["WITH_FMT_EXAMPLE"] = "ON"
+        else:
+            tc.variables["WITH_FMT_EXAMPLE"] = "OFF"
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()

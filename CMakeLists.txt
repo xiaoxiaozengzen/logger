@@ -22,4 +22,8 @@ if(DEFINED WITH_SPDLOG_EXAMPLE)
     add_subdirectory(spdlog_example)
 endif()
 
+if(DEFINED WITH_FMT_EXAMPLE)
+    add_subdirectory(fmt_example)
+endif()
+
 add_subdirectory(example)
