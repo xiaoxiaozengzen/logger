@@ -229,7 +229,8 @@ void ostream_example() {
   ostream_logger->warn("This is a warn message from ostream_logger");
   ostream_logger->error("This is an error message from ostream_logger");
   ostream_logger->critical("This is a critical message from ostream_logger");
-  std::cout << "Ostream logger output: " << stream.str() << std::endl;
+  ostream_logger->log(spdlog::level::info, "This is a info message from ostream_logger");
+  std::cout << "Ostream logger output: \n" << stream.str() << std::endl;
 }
 
 int main(int argc, char* argv[]) {
