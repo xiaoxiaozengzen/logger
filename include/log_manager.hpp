@@ -44,6 +44,14 @@ private:
   LogManager::getInstance().getLogger().trace(__VA_ARGS__)
 #define MY_LOG_DEBUG(...) \
   LogManager::getInstance().getLogger().debug(__VA_ARGS__)
+#define MY_LOG_INFO(...) \
+  LogManager::getInstance().getLogger().info(__VA_ARGS__)
+#define MY_LOG_WARN(...) \
+  LogManager::getInstance().getLogger().warn(__VA_ARGS__)
+#define MY_LOG_ERROR(...) \
+  LogManager::getInstance().getLogger().error(__VA_ARGS__)
+#define MY_LOG_CRITICAL(...) \
+  LogManager::getInstance().getLogger().critical(__VA_ARGS__)
 
 
 #endif // LOG_MANAGER_HPP_
